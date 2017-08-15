@@ -18,7 +18,7 @@
                  [metosin/muuntaja "0.3.2"]
                  [metosin/ring-http-response "0.9.0"]
                  [mount "0.1.11"]
-                 [mysql/mysql-connector-java "6.0.5"]
+                 [mysql/mysql-connector-java "5.1.39"]
                  [org.clojure/clojure "1.8.0"]
                  [org.clojure/clojurescript "1.9.854" :scope "provided"]
                  [org.clojure/tools.cli "0.3.5"]
@@ -33,7 +33,11 @@
                  [ring/ring-core "1.6.2"]
                  [ring/ring-defaults "0.3.1"]
                  [secretary "1.2.3"]
-                 [selmer "1.11.0"]]
+                 [selmer "1.11.0"]
+
+                  ; local additions
+                 [json-html "0.4.0"]
+                 [com.andrewmcveigh/cljs-time "0.5.0"]]
 
   :min-lein-version "2.0.0"
 
@@ -89,7 +93,8 @@
                                  [binaryage/devtools "0.9.4"]
                                  [com.cemerick/piggieback "0.2.2"]
                                  [doo "0.1.7"]
-                                 [figwheel-sidecar "0.5.12"]]
+                                 [figwheel-sidecar "0.5.12"]
+                                 [data-frisk-reagent "0.2.3"]]
                   :plugins      [[com.jakemccrary/lein-test-refresh "0.19.0"]
                                  [lein-doo "0.1.7"]
                                  [lein-figwheel "0.5.12"]
