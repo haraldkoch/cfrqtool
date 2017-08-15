@@ -8,7 +8,8 @@
             [ajax.core :refer [GET POST]]
             [cfrqtool.ajax :refer [load-interceptors!]]
             [cfrqtool.handlers]
-            [cfrqtool.subscriptions])
+            [cfrqtool.subscriptions]
+            [cfrqtool.dns :refer [dns-page]])
   (:import goog.History))
 
 (defn nav-link [uri title page collapsed?]
@@ -29,6 +30,7 @@
       [:a.navbar-brand {:href "#/"} "cfrqtool"]
       [:ul.nav.navbar-nav
        [nav-link "#/" "Home" :home collapsed?]
+       [nav-link "#/dns" "DNS" :dns collapsed?]
        [nav-link "#/about" "About" :about collapsed?]]]]))
 
 (defn about-page []
@@ -46,6 +48,7 @@
 
 (def pages
   {:home #'home-page
+   :dns #'dns-page
    :about #'about-page})
 
 (defn page []
@@ -59,6 +62,9 @@
 
 (secretary/defroute "/" []
   (rf/dispatch [:set-active-page :home]))
+
+(secretary/defroute "/dns" []
+  (rf/dispatch [:set-active-page :dns]))
 
 (secretary/defroute "/about" []
   (rf/dispatch [:set-active-page :about]))
