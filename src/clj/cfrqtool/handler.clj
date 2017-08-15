@@ -2,6 +2,7 @@
   (:require [compojure.core :refer [routes wrap-routes]]
             [cfrqtool.layout :refer [error-page]]
             [cfrqtool.routes.home :refer [home-routes]]
+            [cfrqtool.routes.dns :refer [dns-routes]]
             [compojure.route :as route]
             [cfrqtool.env :refer [defaults]]
             [mount.core :as mount]
@@ -13,7 +14,7 @@
 
 (def app-routes
   (routes
-    (-> #'home-routes
+    (-> (routes #'home-routes #'dns-routes)
         (wrap-routes middleware/wrap-csrf)
         (wrap-routes middleware/wrap-formats))
     (route/not-found

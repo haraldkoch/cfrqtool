@@ -2,10 +2,19 @@
   (:require [cfrqtool.layout :as layout]
             [compojure.core :refer [defroutes GET]]
             [ring.util.http-response :as response]
-            [clojure.java.io :as io]))
+            [clojure.java.io :as io]
+            [clojure.tools.logging :as log]))
 
 (defn home-page []
   (layout/render "home.html"))
+
+(defmacro response-handler [fn-name args & body]
+  `(defn ~fn-name ~args
+     (try
+       (response/ok (do ~@body))
+       (catch Exception e#
+         (log/error "error handling request" e#)
+         (response/internal-server-error {:error (.getMessage e#)})))))
 
 (defroutes home-routes
   (GET "/" []
