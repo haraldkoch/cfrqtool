@@ -1,21 +1,21 @@
--- :name create-user! :! :n
--- :doc creates a new user record
-INSERT INTO users
-(id, first_name, last_name, email, pass)
-VALUES (:id, :first_name, :last_name, :email, :pass)
+-- :name create-config! :! :n
+-- :doc creates a new config record
+INSERT INTO config
+(name, value)
+VALUES (:name, :value)
 
--- :name update-user! :! :n
--- :doc update an existing user record
-UPDATE users
-SET first_name = :first_name, last_name = :last_name, email = :email
-WHERE id = :id
+-- :name update-config! :! :n
+-- :doc update an existing config record
+UPDATE config
+SET value = :value
+WHERE name = :name
 
--- :name get-user :? :1
--- :doc retrieve a user given the id.
-SELECT * FROM users
-WHERE id = :id
+-- :name get-config :? :1
+-- :doc retrieve a config given the key.
+SELECT * FROM config
+WHERE name = :name
 
--- :name delete-user! :! :n
--- :doc delete a user given the id
-DELETE FROM users
+-- :name delete-config! :! :n
+-- :doc delete a config given the id
+DELETE FROM config
 WHERE id = :id
