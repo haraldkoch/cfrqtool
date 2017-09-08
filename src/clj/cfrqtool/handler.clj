@@ -1,6 +1,7 @@
 (ns cfrqtool.handler
   (:require [compojure.core :refer [routes wrap-routes]]
             [cfrqtool.layout :refer [error-page]]
+            [cfrqtool.routes.blacklist :refer [blacklist-routes]]
             [cfrqtool.routes.home :refer [home-routes]]
             [compojure.route :as route]
             [cfrqtool.env :refer [defaults]]
@@ -13,7 +14,7 @@
 
 (def app-routes
   (routes
-    (-> #'home-routes
+    (-> (routes #'home-routes #'blacklist-routes)
         (wrap-routes middleware/wrap-csrf)
         (wrap-routes middleware/wrap-formats))
     (route/not-found
