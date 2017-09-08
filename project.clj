@@ -4,6 +4,7 @@
   :url "http://example.com/FIXME"
 
   :dependencies [[buddy "1.3.0"]
+                 [ca.haraldkoch/clj-dns "0.0.3-SNAPSHOT"]
                  [clj-time "0.14.0"]
                  [cljs-ajax "0.6.0"]
                  [compojure "1.6.0"]
