@@ -7,6 +7,7 @@
             [markdown.core :refer [md->html]]
             [ajax.core :refer [GET POST]]
             [cfrqtool.ajax :refer [load-interceptors!]]
+            [cfrqtool.blacklist :refer [blacklist-page]]
             [cfrqtool.handlers]
             [cfrqtool.status :as status]
             [cfrqtool.subscriptions])
@@ -30,6 +31,7 @@
       [:a.navbar-brand {:href "#/"} "cfrqtool"]
       [:ul.nav.navbar-nav
        [nav-link "#/" "Home" :home collapsed?]
+       [nav-link "#/blacklist" "Blacklist" :about collapsed?]
        [nav-link "#/about" "About" :about collapsed?]]]]))
 
 (defn about-page []
@@ -66,6 +68,7 @@
 (defmulti pages (fn [page] page))
 (defmethod pages :home [_] [home-page])
 (defmethod pages :about [_] [about-page])
+(defmethod pages :blacklist [_] [blacklist-page])
 
 (defn page []
   (r/with-let [active-page (rf/subscribe [:page])]
@@ -88,6 +91,8 @@
 (secretary/defroute "/about" []
   (rf/dispatch [:set-active-page :about]))
 
+(secretary/defroute "/blacklist" []
+  (rf/dispatch [:set-active-page :blacklist]))
 ;; -------------------------
 ;; History
 ;; must be called after routes have been defined
@@ -110,6 +115,7 @@
 
 (defn init! []
   (rf/dispatch-sync [:initialize-db])
+  (rf/dispatch [:initialize])
   (load-interceptors!)
   (fetch-docs!)
   (hook-browser-navigation!)

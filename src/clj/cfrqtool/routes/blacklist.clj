@@ -3,7 +3,6 @@
             [cfrqtool.layout :as layout]
             [cfrqtool.routes.home :refer [response-handler]]
             [cfrqtool.validation :refer [validate-blacklist]]
-            [clj-dns.core :as dns]
             [compojure.core :refer [defroutes GET POST PUT DELETE]]
             [ring.util.http-response :as response]
             [clojure.java.io :as io]

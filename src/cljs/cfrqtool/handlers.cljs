@@ -16,3 +16,13 @@
   :set-docs
   (fn [db [_ docs]]
     (assoc db :docs docs)))
+
+(reg-event-db
+  :initialize
+  (fn [db _]
+    (dispatch [:fetch-blacklist])))
+
+(reg-event-db
+  :bad-response
+  (fn [db [_ error]]
+    (assoc db :error error)))

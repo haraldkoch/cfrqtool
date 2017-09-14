@@ -10,3 +10,8 @@
   :docs
   (fn [db _]
     (:docs db)))
+
+(reg-sub
+  :error
+  (fn [db _]
+    (:error db)))

@@ -1,4 +1,4 @@
--- :name get-all-entries! :? :*
+-- :name get-all-entries :? :*
 -- :doc creates a new blacklist record
 SELECT
   id,
