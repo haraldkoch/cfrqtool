@@ -7,7 +7,8 @@
             [markdown.core :refer [md->html]]
             [ajax.core :refer [GET POST]]
             [cfrqtool.ajax :refer [load-interceptors!]]
-            [cfrqtool.blacklist :refer [blacklist-page]]
+            [cfrqtool.effects]
+            [cfrqtool.pages.blacklist :refer [blacklist-page]]
             [cfrqtool.handlers]
             [cfrqtool.status :as status]
             [cfrqtool.subscriptions])

@@ -1,4 +1,4 @@
-(ns cfrqtool.blacklist
+(ns cfrqtool.pages.blacklist
   (:require [ajax.core :refer [GET POST]]
             [cfrqtool.misc :refer [render-table]]
             [re-frame.core :as rf]))
@@ -76,43 +76,39 @@
   (fn [db _]
     (assoc db :show-entry-form? nil)))
 
-(rf/reg-event-db
+(rf/reg-event-fx
   :fetch-blacklist
-  (fn [db _]
-    (GET
-      "/blacklist/entries"
-      {:handler       #(rf/dispatch [:process-blacklist-response %1])
-       :error-handler #(rf/dispatch [:bad-response %1])})
-    (assoc db :blacklist-loaded? false)))
+  (fn [{:keys [db]} _]
+    {:http {:method        GET
+            :url           "/blacklist/entries"
+            :success-event [:process-blacklist-response]
+            :error-event   [:bad-response]}
+     :db   (assoc db :blacklist-loaded? false)}))
 
-(rf/reg-event-db                                            ;; when the GET succeeds
+(rf/reg-event-db
   :process-blacklist-response
   (fn
     [db [_ response]]
     (-> db
-        (assoc :blacklist-loaded? true)                     ;; set flag saying we got it
+        (assoc :blacklist-loaded? true)
         (assoc :blacklist (js->clj response)))))
 
 
+(rf/reg-event-fx
+  :add-blacklist-entry!
+  (fn
+    [{:keys [db]} [_ form-data]]
+    {:http {:method        POST
+            :url           "/blacklist/entries"
+            :success-event [:process-add-response]
+            :error-event   [:bad-response]
+            :ajax-map      {:params form-data}}
+     :db   (assoc db :loading? true)}))
+
 (rf/reg-event-db
-  :add-blacklist-entry!                                     ;; <-- the button dispatched this id
+  :process-add-response
   (fn
-    [db [_ form-data]]
-
-    ;; kick off the GET, making sure to supply a callback for success and failure
-    (POST
-      "/blacklist/entries"
-      {:params        form-data
-       :handler       #(rf/dispatch [:process-response %1]) ;; further dispatch !!
-       :error-handler #(rf/dispatch [:bad-response %1])})   ;; further dispatch !!
-
-    ;; update a flag in `app-db` ... presumably to trigger UI changes
-    (assoc db :loading? true)))                             ;; pure handlers must return a db
-
-(rf/reg-event-db                                            ;; when the GET succeeds 
-  :process-add-response                                     ;; the GET callback dispatched this event  
-  (fn
-    [db [_ response]]                                       ;; extract the response from the dispatch event vector
+    [db [_ response]]
     (-> db
-        (assoc :loading? false)                             ;; take away that modal 
-        (assoc :data (js->clj response)))))                 ;; fairly lame processing
+        (assoc :loading? false)
+        (assoc :data (js->clj response)))))
