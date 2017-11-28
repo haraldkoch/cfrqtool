@@ -6,6 +6,7 @@
             [goog.history.EventType :as HistoryEventType]
             [markdown.core :refer [md->html]]
             [ajax.core :refer [GET POST]]
+            [day8.re-frame.http-fx]
             [cfrqtool.ajax :refer [load-interceptors!]]
             [cfrqtool.effects]
             [cfrqtool.pages.blacklist :refer [blacklist-page]]

@@ -13,6 +13,7 @@
   (str "blacklist entry " (:ip params) " created successfully"))
 
 (defn do-create-entry! [{:keys [:params]}]
+  ; FIXME parse :ipaddr into :ip and :prefix
   (if-let [errors (validate-blacklist params)]
     (response/internal-server-error {:error errors})
     (create-entry! params)))

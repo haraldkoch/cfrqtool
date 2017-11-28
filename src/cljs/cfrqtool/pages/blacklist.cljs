@@ -1,11 +1,13 @@
 (ns cfrqtool.pages.blacklist
-  (:require [ajax.core :refer [GET POST]]
+  (:require [ajax.core :as ajax]
             [cfrqtool.misc :refer [render-table]]
+            [reagent.core :as r]
             [re-frame.core :as rf]))
 
 (defn input-field [param data-atom]
   [:input.form-control
-   {:type        :text :value (get @data-atom param)
+   {:type        :text
+    :value       (get @data-atom param)
     :placeholder (name param)
     :on-change   #(swap! data-atom assoc param (.-value (.-target %)))}])
 
@@ -26,7 +28,7 @@
 
 (defn blacklist-page []
   (let [show-entry-form (rf/subscribe [:show-entry-form?])
-        form-data (atom {:ipaddr nil :type nil :date nil :description nil})
+        form-data (r/atom {:ipaddr nil :type nil :date nil :description nil})
         blacklist (rf/subscribe [:blacklist])
         error (rf/subscribe [:error])
         blacklist-loaded? (rf/subscribe [:blacklist-loaded?])]
@@ -78,12 +80,14 @@
 
 (rf/reg-event-fx
   :fetch-blacklist
-  (fn [{:keys [db]} _]
-    {:http {:method        GET
-            :url           "/blacklist/entries"
-            :success-event [:process-blacklist-response]
-            :error-event   [:bad-response]}
-     :db   (assoc db :blacklist-loaded? false)}))
+  (fn [{db :db} _]
+    {:http-xhrio {:method          :get
+                  :url             "/blacklist/entries"
+                  :format          (ajax/json-request-format)
+                  :response-format (ajax/json-response-format {:keywords? true})
+                  :on-success      [:process-blacklist-response]
+                  :on-failure      [:bad-response]}
+     :db         (assoc db :blacklist-loaded? false)}))
 
 (rf/reg-event-db
   :process-blacklist-response
@@ -93,17 +97,18 @@
         (assoc :blacklist-loaded? true)
         (assoc :blacklist (js->clj response)))))
 
-
 (rf/reg-event-fx
   :add-blacklist-entry!
   (fn
-    [{:keys [db]} [_ form-data]]
-    {:http {:method        POST
-            :url           "/blacklist/entries"
-            :success-event [:process-add-response]
-            :error-event   [:bad-response]
-            :ajax-map      {:params form-data}}
-     :db   (assoc db :loading? true)}))
+    [{db :db} [_ form-data]]
+    {:http-xhrio {:method          :post
+                  :url             "/blacklist/entries"
+                  :params          form-data
+                  :format          (ajax/json-request-format)
+                  :response-format (ajax/json-response-format {:keywords? true})
+                  :on-success      [:process-add-response]
+                  :on-failure      [:bad-response]}
+     :db         (assoc db :loading? true)}))
 
 (rf/reg-event-db
   :process-add-response

@@ -11,7 +11,7 @@
                ajax-map]
         :or {error-event [:ajax-error]
              ajax-map {}}}]
-    (dispatch [:set-loading])
+    #_(dispatch [:set-loading])
     (println "http event method " method " to " url)
     (method url (merge
                   {:handler (fn [response]
@@ -19,8 +19,8 @@
                                 (dispatch (if ignore-response-body
                                             success-event
                                             (conj success-event response))))
-                              (dispatch [:unset-loading]))
+                              #_(dispatch [:unset-loading]))
                    :error-handler (fn [error]
                                     (dispatch (conj error-event error))
-                                    (dispatch [:unset-loading]))}
+                                    #_(dispatch [:unset-loading]))}
                   ajax-map))))
