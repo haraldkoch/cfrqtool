@@ -82,9 +82,9 @@
   :fetch-blacklist
   (fn [{db :db} _]
     {:http-xhrio {:method          :get
-                  :url             "/blacklist/entries"
-                  :format          (ajax/json-request-format)
-                  :response-format (ajax/json-response-format {:keywords? true})
+                  :uri             "/blacklist/entries"
+                  :format          (ajax/transit-request-format)
+                  :response-format (ajax/transit-response-format)
                   :on-success      [:process-blacklist-response]
                   :on-failure      [:bad-response]}
      :db         (assoc db :blacklist-loaded? false)}))
@@ -102,10 +102,10 @@
   (fn
     [{db :db} [_ form-data]]
     {:http-xhrio {:method          :post
-                  :url             "/blacklist/entries"
+                  :uri             "/blacklist/entries"
                   :params          form-data
-                  :format          (ajax/json-request-format)
-                  :response-format (ajax/json-response-format {:keywords? true})
+                  :format          (ajax/transit-request-format)
+                  :response-format (ajax/transit-response-format)
                   :on-success      [:process-add-response]
                   :on-failure      [:bad-response]}
      :db         (assoc db :loading? true)}))
