@@ -88,13 +88,13 @@
 (secretary/set-config! :prefix "#")
 
 (secretary/defroute "/" []
-  (rf/dispatch [:set-active-page :home]))
+                    (rf/dispatch [:set-active-page :home]))
 
 (secretary/defroute "/about" []
-  (rf/dispatch [:set-active-page :about]))
+                    (rf/dispatch [:set-active-page :about]))
 
 (secretary/defroute "/blacklist" []
-  (rf/dispatch [:set-active-page :blacklist]))
+                    (rf/dispatch [:set-active-page :blacklist]))
 ;; -------------------------
 ;; History
 ;; must be called after routes have been defined

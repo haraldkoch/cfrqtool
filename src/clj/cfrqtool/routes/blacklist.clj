@@ -5,8 +5,26 @@
             [cfrqtool.validation :refer [validate-blacklist]]
             [compojure.core :refer [defroutes GET POST PUT DELETE]]
             [ring.util.http-response :as response]
+            [clojure.string :as str]
             [clojure.java.io :as io]
-            [clojure.tools.logging :as log]))
+            [clojure.network.ip :as ip]
+            [clojure.tools.logging :as log])
+  (:import (java.net InetAddress)
+           (java.util Date)))
+
+(defn- default-prefix-length [ip]
+  (let [addr (ip/make-ip-address ip)
+        version (ip/version addr)]
+    (cond
+      (= version 4) 32
+      (= version 6) 128)))
+
+(defn- to-ip-map
+  ([ip] (to-ip-map ip (default-prefix-length ip)))
+  ([ip prefix] {:ip ip :prefix prefix}))
+
+(defn- parse-ipaddr [ipaddr]
+  (apply to-ip-map (str/split ipaddr #"/")))
 
 (defn create-entry! [params]
   (blacklist/create-entry! params)
@@ -14,9 +32,14 @@
 
 (defn do-create-entry! [{:keys [:params]}]
   ; FIXME parse :ipaddr into :ip and :prefix
+  (println "params:" params)
   (if-let [errors (validate-blacklist params)]
     (response/internal-server-error {:error errors})
-    (create-entry! params)))
+    (-> params
+        (merge (parse-ipaddr (:ipaddr params)))
+        (merge {:date (Date.)})
+        (dissoc :ipaddr)
+        (create-entry!))))
 
 
 (defn update-entry! [params]
