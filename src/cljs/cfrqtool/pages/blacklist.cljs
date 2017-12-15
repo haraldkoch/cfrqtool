@@ -46,8 +46,9 @@
           {:on-click #(if @show-entry-form
                         (rf/dispatch [:hide-form])
                         (rf/dispatch [:show-form]))}
-          (if @show-entry-form "hide" "new entry")]]
-        [:div.col-sm-10
+          (if @show-entry-form "hide" "new entry")]]]
+       [:div.row
+        [:div.col-sm-12
          (if-not @blacklist-loaded?
            [:div "Loading blacklist entries..."]
            [render-table @blacklist [:ipaddr :type :date :description]])]
