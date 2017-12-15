@@ -8,6 +8,7 @@
             [ajax.core :refer [GET POST]]
             [cfrqtool.ajax :refer [load-interceptors!]]
             [cfrqtool.handlers]
+            [cfrqtool.status :as status]
             [cfrqtool.subscriptions])
   (:import goog.History))
 
@@ -16,7 +17,7 @@
     [:li.nav-item
      {:class (when (= page @selected-page) "active")}
      [:a.nav-link
-      {:href uri
+      {:href     uri
        :on-click #(reset! collapsed? true)} title]]))
 
 (defn navbar []
@@ -35,7 +36,25 @@
   [:div.container
    [:div.row
     [:div.col-md-12
-     [:img {:src (str js/context "/img/warning_clojure.png")}]]]])
+     [:img {:src (str js/context "/img/warning_clojure.png")}]
+     [:p "CFRQ management tool. Whee!"]]]
+   [:div.row
+            [:div.col-md-12
+             [:button.btn.btn-sm
+              {:on-click #(rf/dispatch [:set-loading])}
+              "Set Loading"]
+             [:button.btn.btn-sm
+              {:on-click #(rf/dispatch [:clear-loading])}
+              "Clear Loading"]
+             [:button.btn.btn-sm
+              {:on-click #(rf/dispatch [:set-status "here is a lovely status message."])}
+              "Set Status"]
+             [:button.btn.btn-sm
+              {:on-click #(rf/dispatch [:clear-status])}
+              "Clear Status"]
+             [:button.btn.btn-sm
+              {:on-click #(rf/dispatch [:set-error "An Error Has Occurred. Panic!"])}
+              "Set Error"]]]])
 
 (defn home-page []
   [:div.container
@@ -44,14 +63,20 @@
       [:div {:dangerouslySetInnerHTML
              {:__html (md->html docs)}}]])])
 
-(def pages
-  {:home #'home-page
-   :about #'about-page})
+(defmulti pages (fn [page] page))
+(defmethod pages :home [_] [home-page])
+(defmethod pages :about [_] [about-page])
 
 (defn page []
-  [:div
-   [navbar]
-   [(pages @(rf/subscribe [:page]))]])
+  (r/with-let [active-page (rf/subscribe [:page])]
+    [:div
+     [:div#topbar
+      [:div#throbber-panel [status/loading-throbber]]
+      [navbar]]
+     [status/error-modal]
+     [:div.container.content
+      [status/status-message]
+      (pages @active-page)]]))
 
 ;; -------------------------
 ;; Routes
