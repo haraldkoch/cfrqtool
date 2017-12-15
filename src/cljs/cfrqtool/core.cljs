@@ -8,7 +8,6 @@
             [ajax.core :refer [GET POST]]
             [day8.re-frame.http-fx]
             [cfrqtool.ajax :refer [load-interceptors!]]
-            [cfrqtool.effects]
             [cfrqtool.pages.blacklist :refer [blacklist-page]]
             [cfrqtool.handlers]
             [cfrqtool.status :as status]

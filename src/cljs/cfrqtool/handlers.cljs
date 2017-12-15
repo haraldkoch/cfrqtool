@@ -17,12 +17,12 @@
   (fn [db [_ docs]]
     (assoc db :docs docs)))
 
-(reg-event-db
+(rf/reg-event-fx
   :initialize
-  (fn [db _]
-    (dispatch [:fetch-blacklist])))
+  (fn [_ _]
+    {:dispatch [:fetch-blacklist]}))
 
-(reg-event-db
+(rf/reg-event-db
   :bad-response
   (fn [db [_ error]]
     (assoc db :error error)))
