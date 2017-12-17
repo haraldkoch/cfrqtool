@@ -40,10 +40,15 @@
             [:button.btn.btn-primary
              {:on-click #(do
                            (rf/dispatch [:update-blacklist-entry! @form-data])
-                           (reset! edit (not @edit)))}
+                           (reset! edit false))}
              "Save"]
             [:button.btn.btn-secondary
-             {:on-click #(reset! edit (not @edit))}
+             {:on-click #(do
+                           (rf/dispatch [:delete-blacklist-entry! (:id entry)])
+                           (reset! edit false))}
+             "Delete"]
+            [:button.btn.btn-secondary
+             {:on-click #(reset! edit false)}
              "Cancel"]]])
         [:tr
          [:td (:ipaddr entry)]
@@ -150,6 +155,9 @@
 (defn replace-by-id [sequence entry]
   (map #(if (= (:id %) (:id entry)) entry %) sequence))
 
+(defn remove-by-id [sequence id]
+  (filter #(when-not (= (:id %) id) %) sequence))
+
 (rf/reg-event-db
   :process-add-response
   (fn
@@ -178,3 +186,24 @@
     (-> db
         (assoc :loading? false)
         (update :blacklist replace-by-id response))))
+
+(rf/reg-event-fx
+  :delete-blacklist-entry!
+  (fn
+    [{db :db} [_ id]]
+    (println "deleting id" id)
+    {:http-xhrio {:method          :delete
+                  :uri             (str "/blacklist/entries/" id)
+                  :format          (ajax/text-request-format)
+                  :response-format (ajax/text-response-format)
+                  :on-success      [:process-delete-response id]
+                  :on-failure      [:http-error]}
+     :db         (assoc db :loading? true)}))
+
+(rf/reg-event-db
+  :process-delete-response
+  (fn
+    [db [_ id response]]
+    (-> db
+        (assoc :loading? false)
+        (update :blacklist remove-by-id id))))

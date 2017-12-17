@@ -47,13 +47,11 @@
 
 (defn update-entry! [params]
   (println "params:" params)
-  (if-let [errors (validate-blacklist params)]
-    (response/internal-server-error {:error errors})
-    (-> params
-        (merge (parse-ipaddr (:ipaddr params)))
-        (merge {:date (Date.)})
-        (dissoc :ipaddr)
-        (blacklist/update-entry!)))
+  (-> params
+      (merge (parse-ipaddr (:ipaddr params)))
+      (merge {:date (Date.)})
+      (dissoc :ipaddr)
+      (blacklist/update-entry!))
   (blacklist/get-entry {:id (:id params)}))
 
 (defn do-update-entry! [_ {:keys [:params]}]
@@ -61,13 +59,16 @@
     (response/internal-server-error {:error errors})
     (update-entry! params)))
 
+(defn do-delete-entry! [id]
+  (blacklist/delete-entry! id)
+  (str "entry " id " deleted."))
 
 (response-handler blacklist-fetch [] (blacklist/get-all-entries))
 (response-handler blacklist-get [id] (blacklist/get-entry {:id id}))
 (response-handler blacklist-find [ip] (blacklist/find-entry {:ip ip}))
 (response-handler blacklist-create [request] (do-create-entry! request))
 (response-handler blacklist-update [id request] (do-update-entry! id request))
-(response-handler blacklist-delete [id] (blacklist/delete-entry! {:id id}))
+(response-handler blacklist-delete [id] (do-delete-entry! {:id id}))
 
 (defroutes blacklist-routes
   (GET "/blacklist/entries" [] (blacklist-fetch))
