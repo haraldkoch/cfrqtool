@@ -35,16 +35,26 @@
   (println "params:" params)
   (if-let [errors (validate-blacklist params)]
     (response/internal-server-error {:error errors})
+    (let
+      [id
+       (-> params
+           (merge (parse-ipaddr (:ipaddr params)))
+           (merge {:date (Date.)})
+           (dissoc :ipaddr)
+           (blacklist/create-entry!)
+           (:generated_key))]
+      (blacklist/get-entry {:id id}))))
+
+(defn update-entry! [params]
+  (println "params:" params)
+  (if-let [errors (validate-blacklist params)]
+    (response/internal-server-error {:error errors})
     (-> params
         (merge (parse-ipaddr (:ipaddr params)))
         (merge {:date (Date.)})
         (dissoc :ipaddr)
-        (create-entry!))))
-
-
-(defn update-entry! [params]
-  (blacklist/update-entry! params)
-  (str "blacklist entry " (:ip params) " updated"))
+        (blacklist/update-entry!)))
+  (blacklist/get-entry {:id (:id params)}))
 
 (defn do-update-entry! [_ {:keys [:params]}]
   (if-let [errors (validate-blacklist params)]

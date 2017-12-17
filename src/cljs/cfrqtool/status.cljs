@@ -12,6 +12,13 @@
     (dissoc db :status)))
 
 (rf/reg-event-db
+  :http-error
+  (fn [db [_ {:keys [last-method uri status response]}]]
+    (-> db
+        (assoc :error (str last-method " to " uri " error " status ":" (:error response)))
+        (dissoc :loading? :should-be-loading?))))
+
+(rf/reg-event-db
   :set-error
   (fn [db [_ error]]
     (assoc db :error error)))

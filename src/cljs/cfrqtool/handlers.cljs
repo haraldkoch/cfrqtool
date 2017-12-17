@@ -22,7 +22,3 @@
   (fn [_ _]
     {:dispatch [:fetch-blacklist]}))
 
-(rf/reg-event-db
-  :bad-response
-  (fn [db [_ error]]
-    (assoc db :error error)))

@@ -1,6 +1,6 @@
 (ns cfrqtool.pages.blacklist
   (:require [ajax.core :as ajax]
-            [cfrqtool.misc :refer [render-table]]
+            [cfrqtool.misc :as misc]
             [reagent.core :as r]
             [re-frame.core :as rf]))
 
@@ -25,6 +25,42 @@
           {:on-click #(do (rf/dispatch [:hide-form])
                           (rf/dispatch [:add-blacklist-entry! @form-data]))}
           "add entry"]]]])))
+
+(defn blacklist-row [_]
+  (let [edit (r/atom false)]
+    (fn [entry]
+      (if @edit
+        (let [form-data (r/atom (merge entry {:date (.getTime (js/Date.))}))]
+          [:tr
+           [:td [input-field :ipaddr form-data]]
+           [:td [input-field :type form-data]]
+           [:td (misc/fmt-time (:date entry))]
+           [:td [input-field :description form-data]]
+           [:td
+            [:button.btn.btn-primary
+             {:on-click #(do
+                           (rf/dispatch [:update-blacklist-entry! @form-data])
+                           (reset! edit (not @edit)))}
+             "Save"]
+            [:button.btn.btn-secondary
+             {:on-click #(reset! edit (not @edit))}
+             "Cancel"]]])
+        [:tr
+         [:td (:ipaddr entry)]
+         [:td (:type entry)]
+         [:td (misc/fmt-time (:date entry))]
+         [:td (:description entry)]
+         [:td [:button.btn.btn-primary
+               {:on-click #(reset! edit (not @edit))}
+               "edit"]]]))))
+
+(defn blacklist-table [items]
+  [:table.table.table-striped.table-condensed
+   [:thead [:tr [:th "IP"] [:th "Type"] [:th "Date"] [:th "Description"] [:th]]]
+   (into [:tbody]
+         (for [entry items]
+           ^{:key (:id entry)}
+           [blacklist-row entry]))])
 
 (defn blacklist-page []
   (let [show-entry-form (rf/subscribe [:show-entry-form?])
@@ -51,7 +87,7 @@
         [:div.col-sm-12
          (if-not @blacklist-loaded?
            [:div "Loading blacklist entries..."]
-           [render-table @blacklist [:ipaddr :type :date :description]])]
+           [blacklist-table @blacklist])]
         ]])))
 
 (rf/reg-sub
@@ -87,7 +123,7 @@
                   :format          (ajax/transit-request-format)
                   :response-format (ajax/transit-response-format)
                   :on-success      [:process-blacklist-response]
-                  :on-failure      [:bad-response]}
+                  :on-failure      [:http-error]}
      :db         (assoc db :blacklist-loaded? false)}))
 
 (rf/reg-event-db
@@ -108,8 +144,11 @@
                   :format          (ajax/transit-request-format)
                   :response-format (ajax/transit-response-format)
                   :on-success      [:process-add-response]
-                  :on-failure      [:bad-response]}
+                  :on-failure      [:http-error]}
      :db         (assoc db :loading? true)}))
+
+(defn replace-by-id [sequence entry]
+  (map #(if (= (:id %) (:id entry)) entry %) sequence))
 
 (rf/reg-event-db
   :process-add-response
@@ -117,4 +156,25 @@
     [db [_ response]]
     (-> db
         (assoc :loading? false)
-        (assoc :data (js->clj response)))))
+        (update :blacklist conj response))))
+
+(rf/reg-event-fx
+  :update-blacklist-entry!
+  (fn
+    [{db :db} [_ form-data]]
+    {:http-xhrio {:method          :put
+                  :uri             (str "/blacklist/entries/" (:id form-data))
+                  :params          form-data
+                  :format          (ajax/transit-request-format)
+                  :response-format (ajax/transit-response-format)
+                  :on-success      [:process-update-response]
+                  :on-failure      [:http-error]}
+     :db         (assoc db :loading? true)}))
+
+(rf/reg-event-db
+  :process-update-response
+  (fn
+    [db [_ response]]
+    (-> db
+        (assoc :loading? false)
+        (update :blacklist replace-by-id response))))

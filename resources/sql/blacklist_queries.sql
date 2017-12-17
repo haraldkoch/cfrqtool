@@ -8,7 +8,7 @@ SELECT
   description
 FROM blacklist;
 
--- :name create-entry! :! :n
+-- :name create-entry! :insert :raw
 -- :doc creates a new blacklist record
 INSERT INTO blacklist
 (ip, prefix, type, date, description)
